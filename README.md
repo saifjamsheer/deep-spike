@@ -1,2 +1,2 @@
 # DeepSpike
-### Deep Learning for Neural Spike Classification & Sorting
+### Deep Learning for Neuronal Spike Classification & Sorting
