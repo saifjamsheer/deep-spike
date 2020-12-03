@@ -1,4 +1,4 @@
 # DeepSpike
 ### Deep Learning for Neuronal Spike Identification & Sorting
 
-This is a work in progress.
+Work in progress: TBC 30/12/20
