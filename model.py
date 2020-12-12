@@ -64,3 +64,7 @@ def forward(X, parameters):
 def cost(AL, y):
 
     return 1
+
+def backward(AL, y, caches):
+
+    return 1
