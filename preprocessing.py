@@ -78,10 +78,27 @@ def extract(signal, spikes, fs, pre, post):
 
     return np.stack(waves)
 
-pre, post = 0.001, 0.002
+pre, post = 0.001, 0.001
 waves = extract(d_f, spikes, fs, pre, post)
 print(waves.shape)
- 
+
+def waveforms(waves, n=100):
+
+    _, ax = plt.subplots(figsize=(12, 6))
+
+    for i in range(n):
+        spike = np.random.randint(0, waves.shape[0])
+        ax.plot(waves[spike, :], color='k', linewidth=1, alpha=0.3)
+
+    ax.autoscale(enable=True, axis='x', tight=True)
+    ax.set_xlabel('# sample')
+    ax.set_ylabel('amplitude [uV]')
+    ax.set_title('spike waveforms')
+    plt.show()
+
+waveforms(waves)
+
+
 def feature():
     return 1
 
