@@ -41,3 +41,27 @@ def waveforms(waves, pre, post, fs, n=100):
     ax.set_ylabel('amplitude [mV]')
     ax.set_title('Spike Waveforms')
     plt.show()
+
+def clusters(data, clusters, n_clusters, centers, waves, fs, time):
+
+    _, ax = plt.subplots(1, 2, figsize=(15, 5))
+    ax[0].scatter(data[:, 0], data[:, 1], c=clusters)
+    ax[0].set_xlabel('PC1')
+    ax[0].set_ylabel('PC2')
+    ax[0].set_title('Clustered Data')
+
+    time = np.linspace(0, waves.shape[1]/fs, waves.shape[1])*1000
+    for i in range(n_clusters):
+        cluster_mean = waves[clusters==i, :].mean(axis=0)
+        cluster_std = waves[clusters==i, :].std(axis=0)
+
+        ax[1].plot(time, cluster_mean, label='Cluster {}'.format(i))
+        ax[1].fill_between(time, cluster_mean-cluster_std, cluster_mean+cluster_std, alpha=0.15)
+
+    ax[1].set_title('Average Waveforms')
+    ax[1].set_xlim([0, time[-1]])
+    ax[1].set_xlabel('time [ms]')
+    ax[1].set_ylabel('amplitude [mV]')
+
+    plt.legend()
+    plt.show()
