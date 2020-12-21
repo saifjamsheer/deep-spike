@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from keras.models import Sequential
 from keras.layers import Dense, Input
+from keras.optimizers import Adam
 from sklearn.metrics import accuracy_score
 
 train_path = '/Users/saif/Desktop/University/Year 4/CI/Final/datasets/training.mat'
@@ -31,43 +32,64 @@ X = np.load('data.npy')
 # index = 3074; plt.plot(X[index]); plt.show()
 
 # Splitting dataset
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1)
+# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1)
+
+# Randomly shuffling datasets in unison 
+p = np.random.permutation(len(X))
+X, y = X[p], y[p]
+
+# Splitting dataset
+# pylint: disable=unbalanced-tuple-unpacking
+X_train, X_val, X_test = np.split(X, [int(.6*len(X)), int(.8*len(X))])
+# pylint: disable=unbalanced-tuple-unpacking
+y_train, y_val, y_test = np.split(y, [int(.6*len(y)), int(.8*len(y))])
 
 # Examining the shapes of the various datasets
 print("number of training examples = {}".format(X_train.shape[0]))
+print("number of validation examples = {}".format(X_val.shape[0]))
 print("number of test examples = {}".format(X_test.shape[0]))
 print("X_train shape: {}".format(X_train.shape))
 print("y_train shape: {}".format(y_train.shape))
+print("X_val shape: {}".format(X_val.shape))
+print("y_val shape: {}".format(y_val.shape))
 print("X_test shape: {}".format(X_test.shape))
 print("y_test shape: {}".format(y_test.shape))
 
 n_x = X_train.shape[1]
 n_y = y_train.shape[1]
 
-def build(n_x, n_y, h_layers):
+def build(n_x, n_y, h_layers, learning_rate=0.001):
 
     model = Sequential()
     model.add(Input(shape=n_x))
 
-    for layer in h_layers:
-        model.add(Dense(layer, activation='relu'))
+    for nodes in h_layers:
+        model.add(Dense(nodes, activation='relu'))
+
+    optimizer = Adam(learning_rate=learning_rate)
 
     model.add(Dense(n_y, activation='softmax'))
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 
     return model
 
+# Building the model
 model = build(n_x, n_y, [7, 7])
-history = model.fit(X_train, y_train, epochs=50, batch_size=16)
 
-train_predict = model.predict(X_train, batch_size=16)
+# Fitting the model to the training data
+history = model.fit(x=X_train, 
+                    y=y_train, 
+                    epochs=50, 
+                    batch_size=16, 
+                    validation_data=(X_val, y_val))
+
 test_predict = model.predict(X_test, batch_size=16)
-train_predict = np.rint(train_predict)
 test_predict = np.rint(test_predict)
 
-train_accuracy = accuracy_score(y_train, train_predict)
+# Validation and testing accuracy
+val_accuracy = history.history['val_accuracy'][-1]
 test_accuracy = accuracy_score(y_test, test_predict)
-print("Train Accuracy: {val}".format(val=train_accuracy))
+print("Validation Accuracy: {val}".format(val=val_accuracy))
 print("Test Accuracy: {val}".format(val=test_accuracy))
 print("..............................................")
 
