@@ -11,7 +11,7 @@ This project consists of the following:
 4. Feature extraction
 5. Feature dimensionality reduction
 6. Clustering
-7. Model training
+7. Model training and parameter optimization
 8. Spike classification
 
 Work in progress: TBC 30/12/20
