@@ -1,17 +1,12 @@
-# DeepSpike
-### Deep Learning for Neuronal Spike Detection & Classification (Spike Sorting)
+# SpikeSort
+###  Neural Spike Detection, Extraction, and Classification
 
 Final Project for EE40098 Computational Intelligence at the University of Bath
 
 This project consists of the following:
 
-1. Signal filtering and smoothing
-2. Spike detection
-3. Spike waveform extraction
-4. Feature extraction
-5. Feature dimensionality reduction
-6. Clustering
-7. Model training and parameter optimization
-8. Spike classification
-
-Work in progress: TBC 30/12/20
+1. Signal processing and denoising
+2. Detecting positions of spikes
+3. Extracting waveforms of individual spikes
+4. Model training and parameter optimization
+5. Classifying spikes within denoised submission recording
