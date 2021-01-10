@@ -1,5 +1,5 @@
 # SpikeSort
-###  Detecting, Extracting, and Classifying Spikes from Extracellular Action Potential Recordings
+###  Detecting, Extracting, and Classifying Neural Spikes from Extracellular Action Potential Recordings
 
 Final Project for EE40098 Computational Intelligence at the University of Bath
 
