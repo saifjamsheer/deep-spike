@@ -1,13 +1,6 @@
 # SpikeSort
 ###  Detecting, Extracting, and Classifying Neural Spikes from Extracellular Action Potential Recordings
 
-Final Project for EE40098 Computational Intelligence at the University of Bath
+Final Project for EE40098 Computational Intelligence at the University of Bath. The goal of the project is to process extracellular action potential recordings and automatically identify when extracllular action potentials (neural spikes) occur, and what neuron type produced each spike. The recordings contain thousands of spikes with subtly different morphologies produced by four different types of neuron. The processing of the recordings involves detecting when in time each spike occurs and extracting them for subsequent classification. This information enables the selective recording from individual neurons, a critically unmet need in modern neuroscience. 
 
-This project consists of the following:
-
-1. Signal processing
-2. Detecting positions of spikes
-3. Extracting waveforms of individual spikes
-4. Model training and evaluation 
-5. Parameter optimization with simulated annealing
-6. Classifying spikes within submission recording
+The final system correctly classified 3420 neural spikes on the submission dataset, which contains a real recording made from the cortical region of the brain of a human, and thus achieved a classification accuracy of 0.9286.
