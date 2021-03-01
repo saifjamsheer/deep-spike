@@ -119,36 +119,33 @@ def preprocess(training_path, window, fc_train):
 
     return train_spikes, train_classes
 
-def main():
 
-    training_path = 'training.mat' # Path of training data 
+training_path = 'datasets/training.mat' # Path of training data 
 
-    window = [15, 26] # Window size for extracting spikes from the recordings
-    fc_train = 2500 # Cut-off frequency for denoising training recording
+window = [15, 26] # Window size for extracting spikes from the recordings
+fc_train = 2500 # Cut-off frequency for denoising training recording
 
-    # Detect and extract spikes and spike classes to create training set (X) and labels (y)
-    X, y = preprocess(training_path, window, fc_train)
+# Detect and extract spikes and spike classes to create training set (X) and labels (y)
+X, y = preprocess(training_path, window, fc_train)
 
-    # Split training dataset with an 80-20 split
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+# Split training dataset with an 80-20 split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
-    k = 5 # Number of neighbors for k-nn
-    p = 2 # Euclidean distance metric
+k = 5 # Number of neighbors for k-nn
+p = 2 # Euclidean distance metric
 
-    # Build the k-nn classifier and fit it to the training subset
-    model = KNeighborsClassifier(n_neighbors=k, p=p)
-    model.fit(X_train, y_train)
+# Build the k-nn classifier and fit it to the training subset
+model = KNeighborsClassifier(n_neighbors=k, p=p)
+model.fit(X_train, y_train)
 
-    # Predict classes for spikes in the test subset
-    y_predict = model.predict(X_test)
+# Predict classes for spikes in the test subset
+y_predict = model.predict(X_test)
 
-    # Display confusion matrix
-    c_matrix = metrics.confusion_matrix(y_test, y_predict)
-    print(c_matrix)
+# Display confusion matrix
+c_matrix = metrics.confusion_matrix(y_test, y_predict)
+print(c_matrix)
 
-    # Display performance metrics
-    performance_metrics = metrics.classification_report(y_test, y_predict, digits=4)
-    print(performance_metrics)
+# Display performance metrics
+performance_metrics = metrics.classification_report(y_test, y_predict, digits=4)
+print(performance_metrics)
 
-if __name__ == "__main__":
-    main()

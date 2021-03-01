@@ -239,8 +239,6 @@ def acceptance_probability(old_cost, new_cost, T):
     """
     Calculates acceptance proability of new solutions to determine
     if the new solution should be accepted.
-
-    *** TAKEN FROM LAB6 ***
     """
     a = np.exp((old_cost-new_cost)/T)
     return a
@@ -248,8 +246,6 @@ def acceptance_probability(old_cost, new_cost, T):
 def anneal(solution, demand, alpha, iterations, var, inputs, labels):
     """
     Implementation of the simulated annealing algorithm for optimization.
-
-    *** TAKEN FROM LAB6 ***
     """
     old_cost = cost(solution, demand, inputs, labels)
     cost_values = list()
@@ -321,58 +317,53 @@ def neighbor(solution, d):
 
     return solution
 
-def main():
+training_path = 'training.mat' # Path of training data 
+submission_path = 'submission.mat' # Path of submission data
 
-    training_path = 'training.mat' # Path of training data 
-    submission_path = 'submission.mat' # Path of submission data
+window = [15, 26] # Window size for extracting spikes from the recordings
+fc_train = 2500 # Cut-off frequency for denoising training recording
+fc_normalize = 25 # Cut-off frequency for normalizing submission recording
+fc_submission = 1900 # Cut-off frequency for denoising submission recording
 
-    window = [15, 26] # Window size for extracting spikes from the recordings
-    fc_train = 2500 # Cut-off frequency for denoising training recording
-    fc_normalize = 25 # Cut-off frequency for normalizing submission recording
-    fc_submission = 1900 # Cut-off frequency for denoising submission recording
+# Detect and extract training spikes, training spike classes, submission spike
+# positions (index values), and submission spikes
+train_spikes, train_classes, submission_peaks, submission_spikes = preprocess(training_path, submission_path, window, fc_train, fc_normalize, fc_submission)
 
-    # Detect and extract training spikes, training spike classes, submission spike
-    # positions (index values), and submission spikes
-    train_spikes, train_classes, submission_peaks, submission_spikes = preprocess(training_path, submission_path, window, fc_train, fc_normalize, fc_submission)
+# Assign the returned output values to new variables
+X, y, S = train_spikes, train_classes, submission_spikes
+Index_S = submission_peaks # Index vector for submission
 
-    # Assign the returned output values to new variables
-    X, y, S = train_spikes, train_classes, submission_spikes
-    Index_S = submission_peaks # Index vector for submission
+# Split training dataset with an 80-20 split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
-    # Split training dataset with an 80-20 split
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+# Initialize simulated annealing variables
+alpha = 0.1 # Temperature decay rate
+iterations = 100 # Number of iterations for simulated annealing
+var = 0.25 # Constant for calculating new solutions
+solution = [np.random.randint(1,20), np.random.randint(1,3)] # Initial parameters ([k, p])
+demand = 1.0 # Target performance value
 
-    # Initialize simulated annealing variables
-    alpha = 0.1 # Temperature decay rate
-    iterations = 100 # Number of iterations for simulated annealing
-    var = 0.25 # Constant for calculating new solutions
-    solution = [np.random.randint(1,20), np.random.randint(1,3)] # Initial parameters ([k, p])
-    demand = 1.0 # Target performance value
+# Determine the optimal parameters for the k-nearest neighbors algorithm
+k_optimal, p_optimal = optimize(solution, demand, alpha, iterations, var, X_train, y_train)
+print("Optimal parameters: n_neighbors = {}, p = {}".format(k_optimal, p_optimal))
 
-    # Determine the optimal parameters for the k-nearest neighbors algorithm
-    k_optimal, p_optimal = optimize(solution, demand, alpha, iterations, var, X_train, y_train)
-    print("Optimal parameters: n_neighbors = {}, p = {}".format(k_optimal, p_optimal))
+# Build the k-nn classifier and fit it to the training subset
+model = KNeighborsClassifier(n_neighbors=k_optimal, p=p_optimal)
+model.fit(X_train, y_train)
 
-    # Build the k-nn classifier and fit it to the training subset
-    model = KNeighborsClassifier(n_neighbors=k_optimal, p=p_optimal)
-    model.fit(X_train, y_train)
+# Predict classes for spikes in the test subset
+y_predict = model.predict(X_test)
 
-    # Predict classes for spikes in the test subset
-    y_predict = model.predict(X_test)
+# Display confusion matrix
+c_matrix = metrics.confusion_matrix(y_test, y_predict)
+print(c_matrix)
 
-    # Display confusion matrix
-    c_matrix = metrics.confusion_matrix(y_test, y_predict)
-    print(c_matrix)
+# Display performance metrics
+performance_metrics = metrics.classification_report(y_test, y_predict, digits=4)
+print(performance_metrics)
 
-    # Display performance metrics
-    performance_metrics = metrics.classification_report(y_test, y_predict, digits=4)
-    print(performance_metrics)
+# Predict classes for spikes extracted from submission recording
+Class_S = model.predict(S)
 
-    # Predict classes for spikes extracted from submission recording
-    Class_S = model.predict(S)
-
-    # Export submission data as .mat file
-    spio.savemat('13235.mat', mdict={'Index': Index_S, 'Class': Class_S})
-
-if __name__ == "__main__":
-    main()
+# Export submission data as .mat file
+spio.savemat('13235.mat', mdict={'Index': Index_S, 'Class': Class_S})

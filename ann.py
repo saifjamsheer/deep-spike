@@ -171,50 +171,45 @@ def build(n_x, n_y, n_h, l_r):
 
     return model
 
-def main():
+training_path = 'datasets/training.mat' # Path of training data 
 
-    training_path = 'training.mat' # Path of training data 
+window = [15, 26] # Window size for extracting spikes from the recordings
+fc_train = 2500 # Cut-off frequency for denoising training recording
 
-    window = [15, 26] # Window size for extracting spikes from the recordings
-    fc_train = 2500 # Cut-off frequency for denoising training recording
+# Detect and extract spikes and spike classes to create training set (X) and labels (y)
+X, y = preprocess(training_path, window, fc_train)
 
-    # Detect and extract spikes and spike classes to create training set (X) and labels (y)
-    X, y = preprocess(training_path, window, fc_train)
+# Convert the lists into numpy arrays
+X, y = np.asarray(X), np.asarray(y)
 
-    # Convert the lists into numpy arrays
-    X, y = np.asarray(X), np.asarray(y)
+# Convert neuron classes to one hot encoded vector representation
+y = convert_to_one_hot(y)
 
-    # Convert neuron classes to one hot encoded vector representation
-    y = convert_to_one_hot(y)
+# Split training dataset with an 80-20 split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
-    # Split training dataset with an 80-20 split
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+# Initialize parameters for neural network
+n_x = X_train.shape[1] # Input nodes
+n_y = y_train.shape[1] # Output nodes
+n_h = 20 # Hidden nodes
+l_r = 0.01 # Learning rate (default Adam optimizer value)
+epochs = 50 # Total number of epochs
+batch_size = 16 # Number of training examples to ues per iteration
 
-    # Initialize parameters for neural network
-    n_x = X_train.shape[1] # Input nodes
-    n_y = y_train.shape[1] # Output nodes
-    n_h = 20 # Hidden nodes
-    l_r = 0.01 # Learning rate (default Adam optimizer value)
-    epochs = 50 # Total number of epochs
-    batch_size = 16 # Number of training examples to ues per iteration
+# Build the neural network model
+model = build(n_x, n_y, n_h, l_r)
 
-    # Build the neural network model
-    model = build(n_x, n_y, n_h, l_r)
+# Train the model on the extracted spikes with their corresponding classes
+history = model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size)
 
-    # Train the model on the extracted spikes with their corresponding classes
-    history = model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size)
+# Predict classes for spikes in the test subset
+y_predict = model.predict(X_test, batch_size=batch_size)
 
-    # Predict classes for spikes in the test subset
-    y_predict = model.predict(X_test, batch_size=batch_size)
+# Convert the softmax probabilities into one-hot encoded vectors
+y_predict = (y_predict == y_predict.max(axis=1)[:,None]).astype(int)
 
-    # Convert the softmax probabilities into one-hot encoded vectors
-    y_predict = (y_predict == y_predict.max(axis=1)[:,None]).astype(int)
-
-    # Displaying performance metrics
-    performance_metrics = metrics.classification_report(y_test, y_predict, digits=4)
-    print(performance_metrics)
-    accuracy = metrics.accuracy_score(y_test, y_predict)
-    print("Accuracy = {}".format(np.round(accuracy,4)))
-
-if __name__ == "__main__":
-    main()
+# Displaying performance metrics
+performance_metrics = metrics.classification_report(y_test, y_predict, digits=4)
+print(performance_metrics)
+accuracy = metrics.accuracy_score(y_test, y_predict)
+print("Accuracy = {}".format(np.round(accuracy,4)))
